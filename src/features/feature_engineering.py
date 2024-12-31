@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 import yaml
 import logging
 
@@ -53,10 +53,10 @@ def load_data(file_path: str) -> pd.DataFrame:
         logger.error('Unexpected error occurred while loading the data: %s', e)
         raise
 
-def apply_tfidf(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features: int) -> tuple:
-    """Apply TfIdf to the data."""
+def apply_count_vectorizer(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features: int) -> tuple:
+    """Apply CountVectorizer to the data."""
     try:
-        vectorizer = TfidfVectorizer(max_features=max_features)
+        vectorizer = CountVectorizer(max_features=max_features)
 
         X_train = train_data['content'].values
         y_train = train_data['sentiment'].values
@@ -72,10 +72,10 @@ def apply_tfidf(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features:
         test_df = pd.DataFrame(X_test_bow.toarray())
         test_df['label'] = y_test
 
-        logger.debug('Bag of Words applied and data transformed')
+        logger.debug('Bag of Words applied and data transformed using CountVectorizer')
         return train_df, test_df
     except Exception as e:
-        logger.error('Error during Bag of Words transformation: %s', e)
+        logger.error('Error during CountVectorizer transformation: %s', e)
         raise
 
 def save_data(df: pd.DataFrame, file_path: str) -> None:
@@ -96,15 +96,13 @@ def main():
         train_data = load_data('./data/interim/train_processed.csv')
         test_data = load_data('./data/interim/test_processed.csv')
 
-        train_df, test_df = apply_tfidf(train_data, test_data, max_features)
+        train_df, test_df = apply_count_vectorizer(train_data, test_data, max_features)
 
-        save_data(train_df, os.path.join("./data", "processed", "train_tfidf.csv"))
-        save_data(test_df, os.path.join("./data", "processed", "test_tfidf.csv"))
+        save_data(train_df, os.path.join("./data", "processed", "train_count_vectorizer.csv"))
+        save_data(test_df, os.path.join("./data", "processed", "test_count_vectorizer.csv"))
     except Exception as e:
         logger.error('Failed to complete the feature engineering process: %s', e)
         print(f"Error: {e}")
 
 if __name__ == '__main__':
     main()
-
-    
